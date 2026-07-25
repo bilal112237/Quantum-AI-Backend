@@ -20,7 +20,10 @@ const envSchema = z.object({
   GROQ_MAX_COMPLETION_TOKENS: z.coerce.number().default(4096),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters'),
   JWT_ISSUER: z.string().default('quantum-ai'),
-  QUANTUM_AI_SERVICE_SECRET: z.string().min(32).optional(),
+  QUANTUM_AI_SERVICE_SECRET: z
+    .string()
+    .min(32, 'QUANTUM_AI_SERVICE_SECRET must be at least 32 characters')
+    .describe('Shared HMAC secret with QuantumChat-Backend — required to sign response receipts'),
   AUTH_REQUIRED: z
     .string()
     .transform((v) => v === 'true')
