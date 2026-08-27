@@ -64,6 +64,7 @@ export class GroqProvider implements IAiProvider {
         messages: request.messages as ChatCompletionMessageParam[],
         max_completion_tokens: request.maxTokens ?? config.GROQ_MAX_COMPLETION_TOKENS,
         temperature: request.temperature ?? 0.7,
+        reasoning_format: 'hidden',
         stream: false,
       });
 
@@ -93,6 +94,7 @@ export class GroqProvider implements IAiProvider {
         messages: request.messages as ChatCompletionMessageParam[],
         max_completion_tokens: request.maxTokens ?? config.GROQ_MAX_COMPLETION_TOKENS,
         temperature: request.temperature ?? 0.7,
+        reasoning_format:'hidden',
         stream: true,
       });
 

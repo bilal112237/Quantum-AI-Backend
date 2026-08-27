@@ -7,3 +7,4 @@ uploads/
 coverage/
 /.env.production
 .env.production
+repomix-output.xml
