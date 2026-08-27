@@ -8,7 +8,7 @@ export interface IDocumentFile extends Document {
   size: number;
   extension: string;
   storagePath: string;
-  storageProvider?: 'local' | 'google-drive';
+  storageProvider?: 'local' | 'google-drive' | 'mongodb';
   storageKey?: string;
   extractedText?: string;
   wordCount?: number;
@@ -27,7 +27,11 @@ const documentSchema = new Schema<IDocumentFile>(
     size: { type: Number, required: true },
     extension: { type: String, required: true },
     storagePath: { type: String, required: true },
-    storageProvider: { type: String, enum: ['local', 'google-drive'], default: 'local' },
+    storageProvider: {
+      type: String,
+      enum: ['local', 'google-drive', 'mongodb'],
+      default: 'local',
+    },
     storageKey: { type: String },
     extractedText: { type: String },
     wordCount: { type: Number },

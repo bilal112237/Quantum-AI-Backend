@@ -43,7 +43,7 @@ export function createApp() {
       },
       credentials: true,
       methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Id'],
       optionsSuccessStatus: 204,
     })
   );

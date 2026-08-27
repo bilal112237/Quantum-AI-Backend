@@ -20,15 +20,21 @@ const envSchema = z.object({
   GROQ_MAX_COMPLETION_TOKENS: z.coerce.number().default(4096),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters'),
   JWT_ISSUER: z.string().default('quantum-ai'),
-  QUANTUM_AI_SERVICE_SECRET: z
-    .string()
-    .min(32, 'QUANTUM_AI_SERVICE_SECRET must be at least 32 characters')
-    .describe('Shared HMAC secret with QuantumChat-Backend — required to sign response receipts'),
+  // Shared with QuantumChat-Backend for signing AI response receipts.
+  // Empty strings (e.g. unset CI secrets) are treated as missing.
+  QUANTUM_AI_SERVICE_SECRET: z.preprocess(
+    (v) => (v === '' || v === undefined ? undefined : v),
+    z
+      .string({ required_error: 'Required' })
+      .min(32, 'QUANTUM_AI_SERVICE_SECRET must be at least 32 characters')
+  ),
   AUTH_REQUIRED: z
     .string()
     .transform((v) => v === 'true')
     .default('false'),
-  STORAGE_PROVIDER: z.enum(['local', 'google-drive']).default('local'),
+  // local = disk (dev only); mongodb = GridFS (recommended on Vercel);
+  // google-drive = optional remote Drive folder.
+  STORAGE_PROVIDER: z.enum(['local', 'google-drive', 'mongodb']).default('local'),
   UPLOAD_DIR: z.string().default('./uploads'),
   GOOGLE_DRIVE_FOLDER_ID: z.string().optional(),
   GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().email().optional(),
@@ -77,9 +83,9 @@ const fallback = {
   GROQ_MAX_COMPLETION_TOKENS: 4096,
   JWT_SECRET: process.env.JWT_SECRET ?? 'vercel-build-placeholder-secret',
   JWT_ISSUER: 'quantum-ai',
-  QUANTUM_AI_SERVICE_SECRET: undefined as string | undefined,
+  QUANTUM_AI_SERVICE_SECRET: process.env.QUANTUM_AI_SERVICE_SECRET || 'vercel-build-placeholder-service-secret',
   AUTH_REQUIRED: false,
-  STORAGE_PROVIDER: 'local' as const,
+  STORAGE_PROVIDER: (process.env.VERCEL ? 'mongodb' : 'local') as 'local' | 'mongodb',
   UPLOAD_DIR: './uploads',
   GOOGLE_DRIVE_FOLDER_ID: undefined as string | undefined,
   GOOGLE_SERVICE_ACCOUNT_EMAIL: undefined as string | undefined,

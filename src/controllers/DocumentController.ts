@@ -7,7 +7,7 @@ import {
 import { sendSuccess } from '../utils/helpers.js';
 import { getRouteParam } from '../utils/params.js';
 import { powerPointService } from '../services/PowerPointService.js';
-
+import { formatConverterService } from '../services/FormatConverterService.js';
 
 
 export class DocumentController {
@@ -177,6 +177,29 @@ export class DocumentController {
     try {
       await documentStorageService.delete(getRouteParam(req, 'id'), req.userId!);
       return sendSuccess(res, { success: true });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  downloadFormat = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = getRouteParam(req, 'id');
+      const format = String(req.query.format || 'pdf');
+      const text = await documentStorageService.getExtractedText(id, req.userId!);
+
+      const sdkFormat = format === 'word' ? 'docx'
+        : format === 'markdown' ? 'md'
+        : format === 'text' ? 'txt'
+        : format;
+
+      const { blob, filename } = await formatConverterService.convertText(text, sdkFormat);
+      const arrayBuffer = await blob.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      res.setHeader('Content-Type', blob.type || 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename || `answer.${sdkFormat}`}"`);
+      return res.send(buffer);
     } catch (err) {
       next(err);
     }

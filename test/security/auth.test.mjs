@@ -12,6 +12,8 @@ before(async () => {
   process.env.JWT_SECRET = SECRET;
   process.env.JWT_ISSUER = 'quantum-chat';
   process.env.AUTH_REQUIRED = 'true';
+  // Required by env schema so AI→QuantumChat receipt HMAC can be signed.
+  process.env.QUANTUM_AI_SERVICE_SECRET = 'test-quantum-ai-service-secret-32b!!';
   ({ authenticate } = await import('../../dist/middleware/auth.js'));
 });
 

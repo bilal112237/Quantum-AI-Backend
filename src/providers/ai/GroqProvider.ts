@@ -2,6 +2,7 @@ import OpenAIImport from 'openai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions.js';
 import { config, logger } from '../../config/index.js';
 import { AiProviderError } from '../../utils/errors.js';
+import { filterChatModels } from '../../utils/chatModels.js';
 import type {
   AiChatRequest,
   AiChatResponse,
@@ -115,7 +116,7 @@ export class GroqProvider implements IAiProvider {
   async listModels(): Promise<string[]> {
     try {
       const models = await this.client.models.list();
-      return models.data.map((m) => m.id);
+      return filterChatModels(models.data.map((m) => m.id));
     } catch (err) {
       logger.error('Groq list models error', { err });
       throw new AiProviderError('Failed to list Groq models', err);

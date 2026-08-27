@@ -1,6 +1,6 @@
 export interface StoredObject {
   key: string;
-  provider: 'local' | 'google-drive';
+  provider: 'local' | 'google-drive' | 'mongodb';
 }
 
 export interface StorageAdapter {
