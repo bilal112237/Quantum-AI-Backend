@@ -15,8 +15,8 @@ const envSchema = z.object({
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
   GROQ_API_KEY: z.string().min(1, 'GROQ_API_KEY is required'),
   GROQ_BASE_URL: z.string().url().default('https://api.groq.com/openai/v1'),
-  GROQ_CHAT_MODEL: z.string().default('llama-3.3-70b-versatile'),
-  GROQ_VISION_MODEL: z.string().default('meta-llama/llama-4-scout-17b-16e-instruct'),
+  GROQ_CHAT_MODEL: z.string().default('openai/gpt-oss-120b'),
+  GROQ_VISION_MODEL: z.string().default('qwen/qwen3.6-27b'),
   GROQ_MAX_COMPLETION_TOKENS: z.coerce.number().default(4096),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters'),
   JWT_ISSUER: z.string().default('quantum-ai'),
@@ -78,13 +78,13 @@ const fallback = {
   MONGODB_URI: process.env.MONGODB_URI ?? '',
   GROQ_API_KEY: process.env.GROQ_API_KEY ?? '',
   GROQ_BASE_URL: 'https://api.groq.com/openai/v1',
-  GROQ_CHAT_MODEL: 'llama-3.3-70b-versatile',
-  GROQ_VISION_MODEL: 'meta-llama/llama-4-scout-17b-16e-instruct',
+  GROQ_CHAT_MODEL: z.string().default('openai/gpt-oss-120b'),
+  GROQ_VISION_MODEL: z.string().default('qwen/qwen3.6-27b'),
   GROQ_MAX_COMPLETION_TOKENS: 4096,
   JWT_SECRET: process.env.JWT_SECRET ?? 'vercel-build-placeholder-secret',
   JWT_ISSUER: 'quantum-ai',
   QUANTUM_AI_SERVICE_SECRET: process.env.QUANTUM_AI_SERVICE_SECRET || 'vercel-build-placeholder-service-secret',
-  AUTH_REQUIRED: false,
+  AUTH_REQUIRED: true,
   STORAGE_PROVIDER: (process.env.VERCEL ? 'mongodb' : 'local') as 'local' | 'mongodb',
   UPLOAD_DIR: './uploads',
   GOOGLE_DRIVE_FOLDER_ID: undefined as string | undefined,
@@ -109,5 +109,13 @@ export const config = {
   isProduction: data.NODE_ENV === 'production',
   maxFileSizeBytes: data.MAX_FILE_SIZE_MB * 1024 * 1024,
 };
+
+if (config.isProduction && !config.AUTH_REQUIRED) {
+  console.error(
+    'SECURITY WARNING: AUTH_REQUIRED=false while NODE_ENV=production. ' +
+    'The X-User-Id header will impersonate any user with zero verification. ' +
+    'All requests will be rejected until this is corrected.'
+  );
+}
 
 export type AppConfig = typeof config;

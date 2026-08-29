@@ -52,6 +52,32 @@ export class ConversationController {
     }
   };
 
+  export = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = getRouteParam(req, 'id');
+      const conv = await conversationService.getById(id, req.userId!);
+      const messages = await conversationService.getMessages(id, req.userId!);
+
+      const title = conv.title || 'Conversation';
+      const exportedAt = new Date().toISOString().slice(0, 10);
+      const body = messages
+        .map((m) => {
+          const who = m.role === 'user' ? '**You**' : '**Quantum AI**';
+          return `### ${who}\n\n${m.content}\n`;
+        })
+        .join('\n---\n\n');
+
+      const markdown = `# ${title}\n\n_Exported from Quantum AI on ${exportedAt}_\n\n---\n\n${body}`;
+
+      const safeName = title.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'conversation';
+      res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${safeName}.md"`);
+      return res.send(markdown);
+    } catch (err) {
+      next(err);
+    }
+  };
+
   update = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = getRouteParam(req, 'id');

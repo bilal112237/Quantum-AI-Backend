@@ -15,10 +15,23 @@ export function createApp() {
   // express-rate-limit throws ERR_ERL_UNEXPECTED_X_FORWARDED_FOR on every request.
   app.set('trust proxy', 1);
 
+  // Fail closed: the X-User-Id auth bypass (see middleware/auth.ts) must
+  // never be reachable in production, regardless of how it got misconfigured.
+  app.use((req, res, next) => {
+    if (config.isProduction && !config.AUTH_REQUIRED) {
+      return res.status(500).json({
+        success: false,
+        error: 'Server misconfigured: AUTH_REQUIRED must be true in production.',
+        code: 'AUTH_MISCONFIGURED',
+      });
+    }
+    next();
+  });
+
   app.use(applyHelmet());
   // Always allow known Quantum product frontends, then merge CORS_ORIGIN.
   // Stale Vercel env without chat.quantumlogicslimited.com used to block
-  // QuantumChat → QuantumAI requests (preflight 204 with no Allow-Origin).
+  // QuantumChat → Quantum AI requests (preflight 204 with no Allow-Origin).
   const allowedOrigins = [
     ...new Set(
       [

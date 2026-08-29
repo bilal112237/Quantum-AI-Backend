@@ -22,6 +22,7 @@ router.use(authenticate);
 router.post('/', validateBody(createConversationSchema), conversationController.create);
 router.get('/', conversationController.list);
 router.get('/:id', validateParams(objectIdParamSchema), conversationController.get);
+router.get('/:id/export', validateParams(objectIdParamSchema), conversationController.export);
 router.patch(
   '/:id',
   validateParams(objectIdParamSchema),
