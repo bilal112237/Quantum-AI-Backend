@@ -17,7 +17,7 @@ export function createApp() {
 
   // Fail closed: the X-User-Id auth bypass (see middleware/auth.ts) must
   // never be reachable in production, regardless of how it got misconfigured.
-  app.use((req, res, next) => {
+  app.use((_req, res, next) => {
     if (config.isProduction && !config.AUTH_REQUIRED) {
       return res.status(500).json({
         success: false,
